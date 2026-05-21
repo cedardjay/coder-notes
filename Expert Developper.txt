@@ -1,0 +1,20 @@
+Thurs/07/may/2026 which platform ?
+- Error and Exception handling (Clear Error Messages helps in debugging)
+- DTO Responses (Do not expose sensitive data)
+- Input data validation: (Fail early if data format or type is not valid)
+- Impose data integrity (Through data types and business logic, don't be loose)
+- DRY code 
+- Api Agregation, caching, lazy loading, parralel calls
+
+- Modular code (Helps in scaling, refactoring, and debugging)
+- Fail early.(Processing is expensive)
+- Use available libraries and frameworks (Do not reinvent the wheel except...)
+- Think as though your code or work will be imported as a library by other devs
+- Consistency, Clarity and modularity vs Efficiency : Efficient may not be modular(Sometimes you have to break the rules)
+- Subconscious patterns. Expert(Expert) But try to make them conscious and standard
+- Intuitive efficiency patterns (e.g database operations) theirs is very powerfull.
+- Patterns vs Languages. (Language is spoken of last) Solve the problem in english first
+- Figuring all out vs starting first.
+- Break and reconstruct, reframe, patch etc.(Different perspectives) => AI is now a tool.
+- Build their own patterns or knowledge.
+- Flat structure vs Hierachy

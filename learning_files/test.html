@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>loan@ | Peer-to-Peer Lending Sanctuary</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#374959",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-fixed-dim": "#aad0a8",
+                        "surface-container-high": "#dfe8ff",
+                        "outline-variant": "#c1c7cf",
+                        "on-tertiary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "on-background": "#0f1c2f",
+                        "surface-variant": "#d7e3fe",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#c5edc3",
+                        "inverse-on-surface": "#ecf0ff",
+                        "on-secondary-container": "#4a6d4b",
+                        "inverse-primary": "#9bcbfc",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "tertiary": "#344556",
+                        "tertiary-container": "#4b5d6f",
+                        "surface-container-highest": "#d7e3fe",
+                        "primary": "#064771",
+                        "primary-fixed": "#cee5ff",
+                        "on-secondary-fixed": "#012108",
+                        "on-surface": "#0f1c2f",
+                        "on-error-container": "#93000a",
+                        "outline": "#72787f",
+                        "inverse-surface": "#253145",
+                        "error": "#ba1a1a",
+                        "surface-tint": "#2f628d",
+                        "secondary": "#446646",
+                        "on-primary-fixed-variant": "#0d4a74",
+                        "on-tertiary-fixed": "#0a1d2c",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#d2e5fa",
+                        "on-primary-container": "#b3d8ff",
+                        "secondary-container": "#c5edc3",
+                        "background": "#f9f9ff",
+                        "on-surface-variant": "#42474e",
+                        "on-primary-fixed": "#001d33",
+                        "tertiary-fixed-dim": "#b6c9dd",
+                        "on-tertiary-container": "#c3d6ea",
+                        "on-secondary-fixed-variant": "#2d4e2f",
+                        "primary-container": "#2b5f8a",
+                        "surface-container": "#e7eeff",
+                        "surface-dim": "#cedaf5",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#9bcbfc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        body { font-family: 'Manrope', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-nav {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface text-on-background antialiased">
+    <div id="root"></div>
+
+    <!-- React Dependencies -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Common Components ---
+
+        const Layout = ({ children, hideNav = false, hideFooter = false, navType = "default" }) => {
+            const navigate = useNavigate();
+            
+            const PublicNav = () => (
+                <header className="fixed top-0 w-full z-50 glass-nav border-b border-outline-variant/20">
+                    <nav className="flex justify-between items-center px-8 py-4 max-w-7xl mx-auto">
+                        <Link to="/" className="text-2xl font-bold tracking-tighter text-on-background">loan@</Link>
+                        <div className="hidden md:flex items-center gap-8">
+                            <Link className="text-primary font-bold border-b-2 border-primary pb-1 text-sm tracking-tight" to="/">Home</Link>
+                            <Link className="text-tertiary hover:text-primary transition-colors duration-300 text-sm font-medium tracking-tight" to="/borrower-dashboard">Borrow</Link>
+                            <Link className="text-tertiary hover:text-primary transition-colors duration-300 text-sm font-medium tracking-tight" to="/investor-dashboard">Invest</Link>
+                            <a className="text-tertiary hover:text-primary transition-colors duration-300 text-sm font-medium tracking-tight" href="#">How It Works</a>
+                            <a className="text-tertiary hover:text-primary transition-colors duration-300 text-sm font-medium tracking-tight" href="#">About</a>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <Link className="text-tertiary font-medium text-sm hover:text-primary transition-all" to="/login">Login</Link>
+                            <Link to="/signup" className="bg-primary-container text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-sm shadow-primary/10">Sign Up</Link>
+                        </div>
+                    </nav>
+                </header>
+            );
+
+            const UserNav = () => (
+                <nav className="fixed top-0 w-full border-b border-slate-200/20 bg-white/85 backdrop-blur-md z-50">
+                    <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center w-full">
+                        <div className="flex items-center gap-8">
+                            <Link to="/" className="text-2xl font-bold text-[#0F1C2F] tracking-tight">@loan</Link>
+                            <div className="hidden md:flex items-center gap-6">
+                                <Link className="text-[#344556] font-medium hover:text-[#2B5F8A] transition-colors text-sm" to="/borrower-dashboard">My Loans</Link>
+                                <Link className="text-[#344556] font-medium hover:text-[#2B5F8A] transition-colors text-sm" to="/investor-dashboard">My Investments</Link>
+                                <a className="text-[#344556] font-medium hover:text-[#2B5F8A] transition-colors text-sm" href="#">Profile</a>
+                                <Link className="text-[#344556] font-medium hover:text-[#2B5F8A] transition-colors text-sm" to="/admin-dashboard">Admin Panel</Link>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <Link to="/" className="material-symbols-outlined text-[#344556] p-2 hover:bg-surface-container rounded-full transition-all">logout</Link>
+                            <div className="w-10 h-10 rounded-full bg-surface-container-highest overflow-hidden border border-outline-variant/20">
+                                <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3-rMVGRh7zc3UJAHf7wUC-BTF9MqFNzRwbonunVdU7tiDVWwVVlQRlmmXGCh0z_X1ki3DkOtUxGG6_NaXyn56nlEuiLdmbZbZNGNOhTIzEHS-5D_odzoQYE017MZMUyzLhG8coRqwR4n7PKmFhM5QtOzano6bfPq-biucqeaJM5-ABR0nbarHjK4iAbdTxpYr3DQkHn8GbwW3vSiclmDOWotLBGu3JFhciycjo6iduqdPXJxPiEv4GmL522LPIDQfZ_P-PtfICTA" />
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {!hideNav && (navType === "default" ? <PublicNav /> : <UserNav />)}
+                    <main className={`flex-grow ${!hideNav ? "pt-20" : ""}`}>
+                        {children}
+                    </main>
+                    {!hideFooter && (
+                        <footer className="bg-surface-container-low pt-24 pb-12 border-t border-outline-variant/20">
+                            <div className="max-w-7xl mx-auto px-8 grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
+                                <div>
+                                    <span className="text-on-background font-black text-xl mb-6 block">Company</span>
+                                    <ul className="space-y-4">
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">About Us</a></li>
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Careers</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <span className="text-on-background font-black text-xl mb-6 block">Learn</span>
+                                    <ul className="space-y-4">
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Blog</a></li>
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Lending 101</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <span className="text-on-background font-black text-xl mb-6 block">Products</span>
+                                    <ul className="space-y-4">
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Personal Loans</a></li>
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Investing Tools</a></li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <span className="text-on-background font-black text-xl mb-6 block">Support</span>
+                                    <ul className="space-y-4">
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Terms</a></li>
+                                        <li><a className="text-tertiary hover:text-primary transition-all text-sm" href="#">Privacy</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div className="max-w-7xl mx-auto px-8 pt-12 border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center gap-8">
+                                <div className="flex items-center gap-4">
+                                    <span className="text-2xl font-black text-on-background">loan@</span>
+                                    <p className="text-tertiary text-sm">© 2024 loan@. The Fiscal Sanctuary. All rights reserved.</p>
+                                </div>
+                            </div>
+                        </footer>
+                    )}
+                </div>
+            );
+        };
+
+        // --- Screen Components ---
+
+        const HomePage = () => {
+            const navigate = useNavigate();
+            return (
+                <Layout>
+                    <section className="max-w-7xl mx-auto px-8 py-20 lg:py-32 flex flex-col items-center text-center">
+                        <h1 className="text-5xl lg:text-7xl font-extrabold text-on-background tracking-tighter mb-8 max-w-4xl leading-[1.1]">
+                            Your all-in-one platform to borrow, lend, and grow your wealth
+                        </h1>
+                        <p className="text-xl text-tertiary max-w-2xl mb-12 leading-relaxed">
+                            Open a free account in minutes right from your phone and make your money work harder
+                        </p>
+                        <div className="flex flex-wrap justify-center items-center gap-10 opacity-40 grayscale filter transition-all hover:grayscale-0 hover:opacity-100 duration-700">
+                            <span className="text-lg font-black tracking-widest uppercase">Express Union</span>
+                            <span className="text-lg font-black tracking-widest uppercase">Visa</span>
+                            <span className="text-lg font-black tracking-widest uppercase">Mastercard</span>
+                            <span className="text-lg font-black tracking-widest uppercase">Stripe</span>
+                        </div>
+                    </section>
+                    <section className="max-w-7xl mx-auto px-8 py-16">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {[["50,000+", "People joined"], ["10,000+", "Active investors"], ["100+", "Partner companies"]].map(([stat, label], i) => (
+                                <div key={i} className="bg-surface-container-lowest p-10 rounded-xl flex flex-col items-center text-center border border-outline-variant/10 shadow-sm shadow-on-background/5">
+                                    <span className="text-4xl font-extrabold text-primary mb-2">{stat}</span>
+                                    <span className="text-tertiary font-medium">{label}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                    <section className="max-w-7xl mx-auto px-8 py-24">
+                        <h2 className="text-3xl lg:text-4xl font-bold text-on-background mb-16 text-center tracking-tight">The Most Trusted Peer-to-Peer Lending Platform</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
+                            {[
+                                { num: "01", title: "Sync across devices", text: "Manage your portfolio or loans from any device with real-time updates and cloud syncing." },
+                                { num: "02", title: "Clear terms, no hidden fees", text: "Transparency is our core value. What you see is exactly what you get, with zero hidden surprises." },
+                                { num: "03", title: "Security by default", text: "Bank-grade encryption and multi-factor authentication protect your assets and data." }
+                            ].map((f, i) => (
+                                <div key={i} className="flex flex-col items-start">
+                                    <div className="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-6">
+                                        <span className="text-secondary font-bold">{f.num}</span>
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+                                    <p className="text-tertiary leading-relaxed">{f.text}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                    <section className="bg-primary-container rounded-3xl p-12 lg:p-20 text-center text-white relative overflow-hidden mx-8 mb-24">
+                        <h2 className="text-3xl lg:text-5xl font-extrabold mb-8 tracking-tighter max-w-3xl mx-auto leading-tight relative z-10">
+                            Take your first step into safe, secure lending and investing
+                        </h2>
+                        <button onClick={() => navigate('/signup')} className="bg-white text-primary px-10 py-4 rounded-xl text-lg font-bold hover:bg-surface transition-all relative z-10 shadow-xl">
+                            Open a Free Account
+                        </button>
+                    </section>
+                </Layout>
+            );
+        };
+
+        const SignupPage = () => {
+            const navigate = useNavigate();
+            return (
+                <Layout hideFooter>
+                    <header className="fixed top-0 w-full z-50 bg-white/85 backdrop-blur-md h-20 border-b border-outline-variant/10">
+                        <nav className="max-w-7xl mx-auto px-8 h-full relative flex justify-between items-center">
+                            <Link to="/" className="text-2xl font-bold tracking-tighter text-[#0F1C2F]">loan@</Link>
+                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <Link className="text-sm font-bold text-tertiary hover:text-primary" to="/">Home</Link>
+                            </div>
+                            <div className="text-sm font-medium text-tertiary">Already have an account? <Link className="text-primary hover:underline" to="/login">Login</Link></div>
+                        </nav>
+                    </header>
+                    <div className="min-h-screen pt-32 pb-20 px-6 flex flex-col items-center justify-center">
+                        <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+                            <section className="flex flex-col gap-8 order-2 lg:order-1">
+                                <div className="space-y-4">
+                                    <h1 className="text-5xl font-extrabold tracking-tighter text-[#1E2A3E] leading-[1.1]">Create your free account</h1>
+                                    <p className="text-lg text-tertiary font-medium">Start borrowing, lending, or both. One account. One dashboard.</p>
+                                </div>
+                                <ul className="space-y-5">
+                                    {["No hidden fees — ever", "Bank-grade encryption", "2-minute signup"].map((item, i) => (
+                                        <li key={i} className="flex items-start gap-3">
+                                            <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                                            <span className="text-tertiary font-medium">{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </section>
+                            <section className="flex flex-col gap-6 order-1 lg:order-2">
+                                <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-10 shadow-sm">
+                                    <h2 className="text-3xl font-extrabold text-[#1E2A3E] tracking-tight mb-8">Sign Up</h2>
+                                    <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); navigate('/verify'); }}>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-bold text-on-surface uppercase tracking-wider">Full name</label>
+                                            <input className="w-full h-12 px-4 rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary" placeholder="John Smith" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-bold text-on-surface uppercase tracking-wider">Email address</label>
+                                            <input className="w-full h-12 px-4 rounded-xl bg-surface-container-low border-none focus:ring-2 focus:ring-primary" type="email" placeholder="john@example.com" />
+                                        </div>
+                                        <button className="w-full h-14 bg-primary-container text-white font-extrabold rounded-lg hover:bg-primary transition-all shadow-lg shadow-primary/10">
+                                            Create Free Account
+                                        </button>
+                                    </form>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </Layout>
+            );
+        };
+
+        const LoginPage = () => {
+            const navigate = useNavigate();
+            return (
+                <Layout hideFooter>
+                    <header className="fixed top-0 w-full z-50 border-b border-slate-200/20 bg-white/85 backdrop-blur-md h-20">
+                        <div className="max-w-7xl mx-auto px-8 h-full flex justify-between items-center">
+                            <Link to="/" className="text-2xl font-bold tracking-tighter text-blue-950">loan@</Link>
+                            <div className="flex items-center gap-6">
+                                <Link to="/" className="text-sm font-bold text-slate-600 hover:text-primary">Home</Link>
+                                <Link to="/signup" className="bg-[#2B5F8A] text-white px-6 py-2 rounded-lg font-bold text-sm">Sign Up</Link>
+                            </div>
+                        </div>
+                    </header>
+                    <main className="min-h-screen flex items-center justify-center pt-24 px-6">
+                        <div className="max-w-md w-full">
+                            <div className="bg-surface-container-lowest border border-[#D1C7B8] rounded-[16px] shadow-sm p-8 md:p-10">
+                                <h2 className="text-2xl font-bold text-[#1E2A3E] mb-8">Sign In</h2>
+                                <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); navigate('/borrower-dashboard'); }}>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-[#5A6C7E]">Email address</label>
+                                        <input className="w-full px-4 py-3 bg-white border border-[#D1C7B8] rounded-[8px]" placeholder="you@example.com" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-[#5A6C7E]">Password</label>
+                                        <input className="w-full px-4 py-3 bg-white border border-[#D1C7B8] rounded-[8px]" type="password" placeholder="••••••••" />
+                                    </div>
+                                    <button className="w-full py-4 bg-[#2B5F8A] text-white font-bold rounded-[8px]">Login</button>
+                                </form>
+                                <div className="mt-8 text-center">
+                                    <p className="text-sm text-[#5A6C7E]">Don't have an account? <Link className="text-[#2B5F8A] font-bold" to="/signup">Sign up</Link></p>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </Layout>
+            );
+        };
+
+        const VerifyPage = () => {
+            const navigate = useNavigate();
+            return (
+                <Layout navType="user">
+                    <main className="pt-32 pb-20 px-6 max-w-5xl mx-auto">
+                        <section className="mb-12">
+                            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-on-background mb-4">Thanks for joining loan@</h1>
+                            <p className="text-lg text-tertiary max-w-2xl leading-relaxed">A few quick steps and you'll be ready to borrow, invest, or both.</p>
+                        </section>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                            <section className="lg:col-span-8 bg-surface-container-lowest border border-[#D1C7B8] rounded-xl p-8 shadow-sm">
+                                <div className="flex justify-between items-center mb-8">
+                                    <h2 className="text-2xl font-bold">Account Verification</h2>
+                                    <span className="text-sm font-semibold text-primary px-3 py-1 bg-surface-container rounded-full">40% Complete</span>
+                                </div>
+                                <div className="w-full h-2.5 bg-surface-container rounded-full mb-10 overflow-hidden"><div className="h-full bg-primary-container" style={{width: '40%'}}></div></div>
+                                <div className="space-y-6">
+                                    <div className="flex items-start gap-4 p-4 rounded-lg bg-surface-container-low">
+                                        <span className="material-symbols-outlined text-[#2E6B3E] font-bold" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                                        <div><h3 className="font-bold">Step 1: Email Verification</h3><p className="text-sm text-[#2E6B3E]">Verified</p></div>
+                                    </div>
+                                    <div className="flex items-start gap-4 p-4 rounded-lg bg-white border border-transparent">
+                                        <span className="material-symbols-outlined text-outline">pending</span>
+                                        <div className="flex-grow flex justify-between items-center">
+                                            <div><h3 className="font-bold">Step 2: Identity Verification</h3><p className="text-sm text-tertiary">Upload ID</p></div>
+                                            <button onClick={() => navigate('/borrower-dashboard')} className="px-5 py-2 border border-primary text-primary rounded-lg text-sm font-semibold">Upload ID</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <aside className="lg:col-span-4 space-y-6">
+                                <div className="bg-white p-6 rounded-xl border border-outline-variant/30">
+                                    <span className="material-symbols-outlined text-3xl text-primary mb-4">payments</span>
+                                    <h3 className="font-bold text-lg">Apply for loans up to $5,000</h3>
+                                    <p className="text-sm text-tertiary mt-2">Competitive rates, flexible terms</p>
+                                </div>
+                            </aside>
+                        </div>
+                    </main>
+                </Layout>
+            );
+        };
+
+        const AdminDashboard = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="bg-background min-h-screen">
+                    <header className="flex justify-between items-center px-8 h-16 w-full sticky top-0 z-50 bg-white/85 backdrop-blur-md border-b border-[#C1C7CF]/20 shadow-sm">
+                        <div className="flex items-center gap-12">
+                            <span className="text-xl font-bold tracking-tighter text-[#0F1C2F]">TrustLend</span>
+                            <nav className="hidden md:flex items-center gap-6 text-sm">
+                                <Link className="text-[#2B5F8A] font-bold border-b-2 border-[#2B5F8A] pb-1" to="/admin-dashboard">Users</Link>
+                                <a className="text-[#344556] hover:text-[#2B5F8A]" href="#">Verifications</a>
+                                <Link className="text-[#344556] hover:text-[#2B5F8A]" to="/super-admin">Global Governance</Link>
+                            </nav>
+                        </div>
+                        <div className="flex items-center gap-6">
+                            <button onClick={() => navigate('/')} className="px-4 py-1.5 bg-primary text-white rounded-lg font-semibold">Logout</button>
+                        </div>
+                    </header>
+                    <main className="max-w-[1400px] mx-auto px-8 py-10">
+                        <h1 className="text-3xl font-extrabold mb-8">User Management</h1>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                            {["Total Users: 1,247", "Verified: 342", "Pending: 156", "Volume: 892k FCFA"].map((t, i) => (
+                                <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm">
+                                    <p className="text-tertiary text-sm font-medium">{t.split(':')[0]}</p>
+                                    <h3 className="text-2xl font-extrabold">{t.split(':')[1]}</h3>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="bg-surface-container-low rounded-xl p-8">
+                            <div className="overflow-x-auto bg-surface-container-lowest rounded-xl shadow-sm">
+                                <table className="w-full text-left">
+                                    <thead>
+                                        <tr className="bg-surface-container-high/30">
+                                            <th className="px-6 py-4 text-[11px] font-extrabold uppercase">User Details</th>
+                                            <th className="px-6 py-4 text-[11px] font-extrabold uppercase">Joined</th>
+                                            <th className="px-6 py-4 text-[11px] font-extrabold uppercase">Status</th>
+                                            <th className="px-6 py-4 text-[11px] font-extrabold uppercase">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-outline-variant/10">
+                                        {[
+                                            { name: "Sarah Mitchell", email: "s.mitchell@outlook.com", date: "Oct 24, 2023", status: "Verified" },
+                                            { name: "Elena Rodriguez", email: "e.rodriguez@gmail.com", date: "Jan 05, 2024", status: "Verified" },
+                                            { name: "James Duarte", email: "j.duarte@pm.me", date: "Nov 12, 2023", status: "Pending" }
+                                        ].map((u, i) => (
+                                            <tr key={i} className="hover:bg-slate-50/50">
+                                                <td className="px-6 py-4">
+                                                    <div className="font-bold text-on-background">{u.name}</div>
+                                                    <div className="text-xs text-outline">{u.email}</div>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-tertiary">{u.date}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-3 py-1 text-[10px] font-bold rounded-full uppercase ${u.status === "Verified" ? "bg-secondary-container/50 text-on-secondary-container" : "bg-surface-container-highest text-outline"}`}>{u.status}</span>
+                                                </td>
+                                                <td className="px-6 py-4"><span className="material-symbols-outlined text-outline">more_horiz</span></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const SuperAdminDashboard = () => {
+            return (
+                <div className="bg-surface min-h-screen flex">
+                    <aside className="hidden md:flex flex-col h-screen w-64 border-r border-outline-variant/20 bg-surface-container-low sticky top-0 py-8">
+                        <div className="px-8 mb-10"><h1 className="font-black text-xl">TrustLend Admin</h1></div>
+                        <nav className="flex-grow">
+                            <ul className="space-y-1">
+                                <li className="pr-4"><a className="flex items-center gap-4 px-8 py-3 bg-white text-primary font-bold rounded-r-full" href="#"><span className="material-symbols-outlined">group</span><span className="text-[10px] uppercase tracking-widest">Users</span></a></li>
+                                <li className="pr-4"><a className="flex items-center gap-4 px-8 py-3 text-tertiary" href="#"><span className="material-symbols-outlined">shield_person</span><span className="text-[10px] uppercase tracking-widest">Admins</span></a></li>
+                                <li className="pr-4"><Link className="flex items-center gap-4 px-8 py-3 text-tertiary" to="/admin-dashboard"><span className="material-symbols-outlined">dashboard</span><span className="text-[10px] uppercase tracking-widest">View Dashboard</span></Link></li>
+                            </ul>
+                        </nav>
+                        <div className="px-8 mt-auto"><Link to="/" className="text-[10px] font-bold uppercase text-tertiary">Sign Out</Link></div>
+                    </aside>
+                    <main className="flex-1 p-8 space-y-10 mt-16">
+                        <header className="fixed top-0 right-0 left-0 md:left-64 bg-white/85 backdrop-blur-md border-b px-8 py-4 z-50 flex justify-between items-center">
+                            <h2 className="text-xl font-bold">TrustLend Super Admin <span className="text-[10px] bg-primary text-white px-2 py-0.5 rounded ml-2">SUPER</span></h2>
+                        </header>
+                        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                            {[["Users", "1,247"], ["Verified", "342"], ["Volume", "$892k"]].map(([l, v], i) => (
+                                <div key={i} className="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 shadow-sm">
+                                    <p className="text-[10px] uppercase text-tertiary mb-2">{l}</p>
+                                    <h3 className="text-2xl font-extrabold">{v}</h3>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+                            <h2 className="text-2xl font-extrabold mb-8">Governance Activity</h2>
+                            <div className="space-y-6">
+                                <div className="flex gap-4 border-l-4 border-primary pl-4">
+                                    <div><p className="text-xs font-bold">Role Promotion</p><p className="text-[10px] text-tertiary">Admin #4 promoted User #TL-8829</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            );
+        };
+
+        const BorrowerDashboard = () => {
+            return (
+                <Layout navType="user">
+                    <main className="pt-32 pb-20 px-6 max-w-5xl mx-auto space-y-8">
+                        <div className="flex items-center gap-3 py-4 px-6 bg-secondary-container/30 rounded-xl border border-secondary-container/20">
+                            <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                            <span className="text-secondary font-semibold">Borrowing: Approved</span>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                            <div className="lg:col-span-5 bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10">
+                                <p className="text-label-md uppercase tracking-widest text-outline mb-4">Available to Borrow</p>
+                                <h2 className="text-5xl font-extrabold text-[#2B5F8A] mb-8 tracking-tighter">1,500 FCFA</h2>
+                                <button className="w-full py-4 bg-primary text-on-primary font-bold rounded-xl">Apply for a Loan</button>
+                            </div>
+                            <div className="lg:col-span-7 space-y-4">
+                                <h3 className="text-xl font-bold">Active Loans</h3>
+                                <div className="bg-surface-container-lowest rounded-xl p-8 shadow-sm border border-outline-variant/10">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div><h4 className="text-2xl font-bold">500.00 FCFA</h4><p className="text-tertiary">Personal Loan • 7.5% APR</p></div>
+                                        <div className="text-right"><span className="text-sm font-bold text-error">120 FCFA due May 1st</span></div>
+                                    </div>
+                                    <div className="h-3 w-full bg-surface-container rounded-full overflow-hidden mb-8"><div className="h-full bg-secondary" style={{width: '40%'}}></div></div>
+                                    <div className="flex gap-4"><button className="flex-1 py-3 bg-[#B85C4A] text-white font-bold rounded-xl">Make Payment</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </Layout>
+            );
+        };
+
+        const InvestorDashboard = () => {
+            return (
+                <Layout navType="user">
+                    <main className="pt-32 pb-16 px-8 max-w-7xl mx-auto space-y-8">
+                        <div className="bg-secondary-container/30 border border-secondary/10 rounded-xl px-6 py-4 flex items-center gap-3">
+                            <span className="material-symbols-outlined text-secondary" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
+                            <span className="text-on-secondary-container font-semibold">Investing: Approved</span>
+                        </div>
+                        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <div className="lg:col-span-8 bg-surface-container-lowest border border-[#D1C7B8]/40 rounded-xl p-8 shadow-sm flex flex-col md:flex-row justify-between items-center gap-8">
+                                <div className="space-y-4">
+                                    <label className="text-label-md uppercase tracking-widest text-outline">Portfolio Overview</label>
+                                    <div className="flex flex-wrap gap-12">
+                                        <div><p className="text-tertiary text-sm">Total Invested</p><h2 className="text-4xl font-extrabold text-[#1E2A3E]">5,000,000 FCFA</h2></div>
+                                        <div><p className="text-tertiary text-sm">Total Earned</p><h2 className="text-4xl font-extrabold text-[#2E6B3E]">+320,000 FCFA</h2></div>
+                                    </div>
+                                </div>
+                                <button className="bg-primary text-on-primary px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/10">Lend Money</button>
+                            </div>
+                            <div className="lg:col-span-4 bg-primary text-on-primary rounded-xl p-8 flex flex-col justify-between">
+                                <div><p className="text-on-primary/60 text-sm mb-1 uppercase">Growth Forecast</p><h3 className="text-2xl font-bold">+8.4% APY</h3></div>
+                                <div className="mt-4 text-sm text-on-primary/80">Your portfolio is outperforming market average by 2.1%.</div>
+                            </div>
+                        </section>
+                        <section className="space-y-4">
+                            <h3 className="text-2xl font-extrabold">Active Investments</h3>
+                            <div className="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm">
+                                <table className="w-full text-left">
+                                    <thead className="bg-surface-container-low/50">
+                                        <tr>
+                                            <th className="px-6 py-4 text-xs font-bold uppercase text-outline">Borrower</th>
+                                            <th className="px-6 py-4 text-xs font-bold uppercase text-outline">Amount Lent</th>
+                                            <th className="px-6 py-4 text-xs font-bold uppercase text-outline">Rate</th>
+                                            <th className="px-6 py-4 text-xs font-bold uppercase text-outline">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-outline-variant/10">
+                                        {[
+                                            { name: "Sarah Miller", amount: "1,200,000 FCFA", rate: "8.5%", status: "On Time", color: "bg-[#2E6B3E]" },
+                                            { name: "Robert K.", amount: "850,000 FCFA", rate: "10.2%", status: "Late", color: "bg-[#C26A6A]" }
+                                        ].map((inv, i) => (
+                                            <tr key={i} className="hover:bg-surface-container-low transition-colors">
+                                                <td className="px-6 py-5 font-semibold">{inv.name}</td>
+                                                <td className="px-6 py-5">{inv.amount}</td>
+                                                <td className="px-6 py-5">{inv.rate}</td>
+                                                <td className="px-6 py-5"><div className="flex items-center gap-2"><span className={`w-2 h-2 rounded-full ${inv.color}`}></span>{inv.status}</div></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </main>
+                </Layout>
+            );
+        };
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/signup" element={<SignupPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/verify" element={<VerifyPage />} />
+                        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                        <Route path="/super-admin" element={<SuperAdminDashboard />} />
+                        <Route path="/borrower-dashboard" element={<BorrowerDashboard />} />
+                        <Route path="/investor-dashboard" element={<InvestorDashboard />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const container = document.getElementById('root');
+        const root = createRoot(container);
+        root.render(<App />);
+    </script>
+</body>
+</html>

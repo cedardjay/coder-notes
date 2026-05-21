@@ -1,0 +1,22 @@
+controller
+security
+service
+repository
+entity
+dto
+utils
+exception
+
+jwt
+bcrypt
+json
+jackson
+pom.xml
+response entity
+response,status, message
+getmapping
+preauthorise
+http request
+get,post,put,patch,delete,head,options
+websocket
+postman

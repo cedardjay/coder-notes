@@ -1,0 +1,9 @@
+useNavigate
+map
+axios
+const bottomNavItems = [
+  { icon: "🏠", label: "Hybrid", path: "/dashboard" },
+  { icon: "📊", label: "Invest", path: "/investor-portal", active: true },
+  { icon: "💰", label: "Borrow", path: "/borrower-portal" },
+  { icon: "👤", label: "Profile", path: "/profile" },
+];

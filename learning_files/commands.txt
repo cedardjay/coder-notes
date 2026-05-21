@@ -1,0 +1,1 @@
+PS C:\Users\DELL> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
