@@ -1,0 +1,55 @@
+API INTEGRATION HEADS UP:
+
+Based on the context of your project (React + Spring Boot, JWT auth, the loan@ app), here's a focused list of things **not to do** when integrating a page like MyInvestments with the backend:
+
+---
+
+**On the API / Service Layer**
+
+- Don't make raw `fetch`/`axios` calls directly inside components — always go through `ApiService`. If the base URL or auth header changes, you want one place to fix it, not 20.
+- Don't hardcode the base URL (`http://localhost:8080`) inside components or even in `ApiService` — put it in a `.env` file as `REACT_APP_API_URL` and reference `process.env.REACT_APP_API_URL`.
+- Don't forget the `Authorization: Bearer <token>` header — Spring Boot's security filter will return a silent 403 and you'll waste time debugging.
+
+---
+
+**On State Management**
+
+- Don't fetch data without the three states: `loading`, `error`, and the data itself. Skipping loading/error states is the most common mistake — it makes the UI feel broken.
+- Don't set state on an unmounted component — always clean up async calls in `useEffect` with an `isMounted` flag or an `AbortController`, otherwise you get memory leak warnings.
+- Don't mutate state directly — always use the setter. `investments.push(x)` won't trigger a re-render; `setInvestments([...investments, x])` will.
+
+---
+
+**On Performance**
+
+- Don't fire multiple API calls sequentially when they're independent — use `Promise.all` to run them in parallel.
+- Don't re-fetch on every single keystroke for search — debounce it (300–400ms). Without this you'll hammer the backend and get race conditions where a slower earlier response overwrites a faster later one.
+- Don't fetch the entire dataset client-side when the list could grow large — design for pagination or server-side filtering from the start, even if you don't need it immediately.
+
+---
+
+**On Security**
+
+- Don't store sensitive data beyond the token in `localStorage` — it's accessible to any JS on the page. The token is a necessary evil; additional sensitive info shouldn't live there.
+- Don't expose or log the JWT token in console statements during debugging and then forget to remove them before pushing.
+- Don't skip token expiry handling — if the backend returns a 401, redirect to `/login` and clear `localStorage`. Without this, users get stuck with cryptic errors.
+
+---
+
+**On Error Handling**
+
+- Don't swallow errors silently with an empty `catch` block — at minimum log them; ideally show the user a meaningful message.
+- Don't show raw backend error messages directly to users — `error.response?.data?.message` might expose internal details. Map them to friendly UI messages.
+- Don't assume the response shape is always what you expect — a backend change can return a different structure and crash the UI. Defensive access (`data?.investments ?? []`) prevents white screens.
+
+---
+
+**On the Component Itself**
+
+- Don't mix UI logic with data-fetching logic in the same block — keep `useEffect` for fetching, and keep rendering clean. Makes both easier to debug.
+- Don't forget to handle the case where the data is `null` or an empty array — render an empty state, not a crashed component.
+- Don't leave hardcoded mock data in the component alongside real API calls — it creates confusion about what's real and can silently mask API failures during development.
+
+---
+
+The single most expensive mistake in practice is **skipping the error + loading states** and **not debouncing search** — those two alone cause the most visible bugs and the most wasted debugging time.
