@@ -1,0 +1,11 @@
+Rollbacks -> data integrity
+Lazy fetching -> query response optimisation
+Normalisation vs Acceptable redundancy -> for performance
+predict high frequency queries
+
+Direct vs indirect access judgment:
+Direct foreign keys or use indirect fk ie multi joins queries?
+High frequency queries -> Direct foreign keys e.g (reporting and auditing dashboards)
+Enforcing data integrity, independent relationships -> Direct fk
+Rare or low frequency queries, risk of circular dependencies -> indirect fk
+Use direct fk if you find yourself writing thesame multijoin query several times.
