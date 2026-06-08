@@ -1,0 +1,3 @@
+Idempotency -> eg prevent double transactions
+Eventual consistency -> eg if external payments are involved 
+All or nothing -> All the processes involved must either suceed or fail together

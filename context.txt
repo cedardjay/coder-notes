@@ -1,0 +1,228 @@
+@PutMapping("/disburse/{requestId}")
+    @PreAuthorize("hasAuthority('SUPERADMIN')")
+    public ResponseEntity<Response> disburseLoan(@PathVariable Long requestId) {
+        Response response = loanRequestService.disburseLoan(requestId);
+        return ResponseEntity.status(response.getStatusCode()).body(response);
+    }
+
+
+package com.finance.loan.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "repayment_schedule")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class RepaymentSchedule {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long scheduleId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_id", nullable = false)
+    private LoanRequest loanRequest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transaction_id")
+    private Transaction transaction;
+
+    @Column(nullable = false)
+    private Integer installmentNumber;
+
+    @Column(nullable = false)
+    private LocalDate dueDate;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amountDue;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal principalComponent;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal interestComponent;
+
+    @Column(precision = 19, scale = 2)
+    private BigDecimal amountPaid;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private ScheduleStatus status;
+
+    private LocalDate paidDate;
+
+}
+
+
+
+package com.finance.loan.entity;
+
+import java.util.List;
+import java.util.ArrayList;
+import jakarta.persistence.*;
+import lombok.Data;
+
+
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Data
+@Entity
+@Table(name = "loan_requests")
+public class LoanRequest {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long requestId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "borrower_id", nullable = false)
+    private User borrower;
+
+    @Column(nullable = false)
+    private BigDecimal requestedAmount;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(nullable = false)
+    private String purpose;
+
+    @Column(nullable = false)
+    private Integer termMonths;
+
+    @Column(nullable = false)
+    private BigDecimal interestRate;
+
+    @Column(nullable = false)
+    private BigDecimal amountFunded = BigDecimal.ZERO; //setting initial amount to zero
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private LoanStatus status = LoanStatus.PENDING_APPROVAL; //loanRequest automatically set to pending after creation
+
+
+    @Column(updatable = false, nullable=false)
+    private LocalDateTime requestDate;
+
+    private LocalDate deadLine; //admin sets Expiry date for the loanRequest
+
+    @OneToMany(mappedBy = "loanRequest", fetch = FetchType.LAZY)
+    private List<RepaymentSchedule> repaymentSchedules;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approval_id")
+    private User approval; //Approved or rejected
+
+    @OneToMany(mappedBy = "loanRequest", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<MatchedRequest> matchedRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "loanRequest", fetch = FetchType.LAZY)
+    private List<Transaction> transactions = new ArrayList<>();
+}
+
+package com.finance.loan.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "transaction")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Transaction {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long transactionId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
+    private User sender;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
+    private User receiver;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_id", nullable = false)
+    private LoanRequest loanRequest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id")
+    private RepaymentSchedule repaymentSchedule;
+
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal amount;
+
+    @Column(nullable = false)
+    private String paymentMethod;
+
+    @Column(nullable = false)
+    private LocalDateTime transactionDate;
+
+    @Column(nullable = true)
+    private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TransactionType transactionType;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private TransactionStatus transactionStatus;
+
+
+}
+
+USE THIS PATTERN 
+
+ // REJECT Loan Request (ADMIN / SUPERADMIN)
+    public Response rejectLoanRequest(Long requestId) {
+        Response response = new Response();
+        try {
+            LoanRequest loanRequest = loanRequestRepository.findById(requestId)
+                    .orElseThrow(() -> new OurException("Loan request not found with id: " + requestId));
+
+            if (loanRequest.getStatus() != LoanStatus.PENDING_APPROVAL) {
+                response.setStatusCode(400);
+                response.setMessage("Only pending loan requests can be rejected");
+                return response;
+            }
+
+            loanRequest.setStatus(LoanStatus.REJECTED);
+            LoanRequest updatedRequest = loanRequestRepository.save(loanRequest);
+
+            response.setStatusCode(200);
+            response.setMessage("Loan request rejected successfully");
+            response.setLoanrequest(Utils.mapLoanRequestEntityToOutput(updatedRequest));
+
+        } catch (OurException e) {
+            response.setStatusCode(404);
+            response.setMessage(e.getMessage());
+        } catch (Exception e) {
+            response.setStatusCode(500);
+            response.setMessage("Error rejecting loan request: " + e.getMessage());
+        }
+        return response;
+    }

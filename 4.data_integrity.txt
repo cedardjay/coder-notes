@@ -1,0 +1,2 @@
+Rollbacks: data integrity, @Transactional
+Enums, data types

@@ -1,0 +1,83 @@
+Here's the mental checklist. Every service method you write should follow this order:
+
+---FETCH → VALIDATE → EXECUTE → PERSIST → RETURN
+
+## The 6-Step Service Method Pattern
+
+### 1. Fetch
+Get everything you need from the database first. All your repository calls happen here, at the top.
+
+### 2. Validate
+Check that the data you fetched makes sense for this operation. Wrong status? Missing field? Throw a custom exception here. **No database writes yet.**
+
+### 3. Execute the core logic
+This is the actual business operation — calculate something, call an external service, transform data.
+
+### 4. Persist
+Now you write to the database. All your `.save()` calls happen here.
+
+### 5. Return
+Return a clean response object. Never return raw entities to the controller.
+
+---
+
+That's it. The rule is simple: **you never write before you validate, and you never validate before you fetch.**
+
+---
+
+## The Pattern in Plain English
+
+```
+FETCH → VALIDATE → EXECUTE → PERSIST → RETURN
+```
+
+Most messy service code is just these steps happening in the wrong sequence or blended together.
+
+---
+
+## The One Extra Rule for Complex Methods
+
+When a method needs to do **multiple things** (like your disbursement — schedule + status + transaction), you add one step before all of the above:
+
+**0. Orchestrate** — your public method *only* calls private methods or other service methods. It does no logic itself.
+
+Each private method or other service method then follows its own Fetch → Validate → Execute → Persist → Return internally.
+
+---
+
+This is the whole pattern. Before writing any new service method, just ask: *which step am I on right now?* That question alone will stop 80% of the mess.
+
+EXAMPLE
+
+Here's what the disburse method will do, step by step:
+1. Fetch
+Get the loan by ID from the database.
+
+2. Validate
+
+Does the loan exist?
+Is the loan status APPROVED? (not already active, not pending)
+Does the loan have a borrower linked to it?
+
+3. Execute
+
+Call the payment gateway to disburse the funds (mock for now)
+Get back a transaction reference from the gateway
+
+4. Persist — four things in order:
+
+Record a Transaction entry (amount, reference, timestamp, type = DISBURSEMENT)
+Generate and save the RepaymentSchedule entries (one row per installment)
+Update the Loan status to ACTIVE
+Set the disbursedAt date on the loan
+
+5. Return
+A response object containing the updated loan, the transaction reference, and the repayment schedule.
+
+The entire method is wrapped in @Transactional so if anything in step 4 fails, all four writes roll back together.
+
+_________________________________________________________________________________________________________________________________________
+
+One service function can call a different service function.
+Eg: Disbursal function calls transaction service and Repaymentschedule service
+The Orchestrator service function calls other services or private functions.

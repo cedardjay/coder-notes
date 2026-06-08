@@ -1,8 +1,10 @@
-Rollbacks -> data integrity
-Lazy fetching -> query response optimisation
-Normalisation vs Acceptable redundancy -> for performance
-predict high frequency queries
+Lazy fetching: query response optimisation
 
+Normalisation vs Acceptable redundancy : for performance
+
+Do not fetch what you do not need
+
+predict high frequency queries
 Direct vs indirect access judgment:
 Direct foreign keys or use indirect fk ie multi joins queries?
 High frequency queries -> Direct foreign keys e.g (reporting and auditing dashboards)
