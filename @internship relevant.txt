@@ -1,0 +1,4 @@
+back office
+merchant id
+merchant secret
+enrrolment device

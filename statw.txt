@@ -1,28 +1,7 @@
-PENDING_APPROVAL
-       /   \
-      v     v
- APPROVED   REJECTED
-     |_____________
-     v            |
-PARTIALLY_FUNDED  |
-     |        \   |
-     v         v  v
-FULLY_FUNDED   EXPIRED
-     |
-     v
- ACTIVE ──────────────────────┐
-  |  ^                        |
-  |  |                        |
-  v  |                        |
-IN_GRACE                      |
-  |                           |
-  v                           |
-DEFAULT                       | 
-                              v
-                           COMPLETED
-
-
-
-
-
-
+back office
+merchant id
+merchant secret
+enrrolment device
+device name
+device id
+device serial number
