@@ -1,0 +1,14 @@
+back office
+merchant id
+merchant secret
+enrrolment device
+device name
+device id
+device serial number
+enrolment
+payment
+nomenclature
+interface
+validation levels
+Transaction failed
+device does not support google play services

@@ -1,0 +1,15 @@
+nested ressources
+
+Use /loan-requests/{id}/transactions because:
+
+    ✅ Follows REST conventions
+
+    ✅ Clearly shows the relationship
+
+    ✅ Easier to understand for other developers
+
+    ✅ Matches industry standards
+
+    ✅ Allows future nested resources like /loan-requests/{id}/repayment-schedule
+
+The only time to use /transactions/loan-request/{id} is if loan-request is actually a property of Transaction that you're filtering by — but even then, query parameters are cleaner: /transactions?loanRequestId={id}.
